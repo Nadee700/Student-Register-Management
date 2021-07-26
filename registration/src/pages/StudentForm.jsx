@@ -203,7 +203,7 @@ const StudentForm = ({
               <Form.Field>
                 <label>Phone No</label>
                 <Form.Input
-                  placeholder="First Name"
+                  placeholder="Phone no"
                   value={phoneNo}
                   onChange={handleChange}
                   name="phoneNo"

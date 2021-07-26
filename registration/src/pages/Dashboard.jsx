@@ -37,17 +37,17 @@ const StudentDashboard = ({
     { title: "Email", field: "email" },
     { title: "NIC", field: "nic" },
   ];
-  const [studentList, setStudentList] = useState(studentData);
+  const [studentList, setStudentList] = useState([]);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     loadStudents();
-  }, []);
+  },[]);
 
   const loadStudents = async () => {
     await initStudents();
     setStudentList(studentData);
-    console.log(all, isLoading);
+    console.log(all, isLoading, studentData);
   };
 
   const afterUpdateData = (data) => {
