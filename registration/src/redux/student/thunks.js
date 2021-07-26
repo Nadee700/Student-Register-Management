@@ -29,7 +29,7 @@ export const loadStudentData = () => async(dispatch)=> {
     }
 }
 
-// POST 
+// POST Request
 export const createStudent = (std) => async(dispatch)=> {
     try{
      
@@ -47,7 +47,7 @@ export const createStudent = (std) => async(dispatch)=> {
     }
 }
 
-//Update 
+// Update Request
 export const updateStudent = (std) => async(dispatch)=> {
     try{
      
@@ -65,7 +65,7 @@ export const updateStudent = (std) => async(dispatch)=> {
     }
 }
 
-//Delete 
+// Delete Request
 export const deleteStudent = (id) => async(dispatch)=> {
     try{
           console.log("delete", id)

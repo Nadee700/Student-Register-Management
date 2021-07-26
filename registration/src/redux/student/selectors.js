@@ -15,7 +15,7 @@ const selectStdFail = createSelector (selectStudentState,
     (currentState) => currentState.error,    
 )
 
-// =============================================================
+// ======================== Create =========================
 
 const selectAddStdLoading = createSelector(
     selectStudentState,
@@ -32,8 +32,7 @@ const selectAddStdFail = createSelector(
     (currentState)=> currentState.error,
 )
 
-// ========= Update ===================================
-
+// ======================== Update ========================
 const selectUpdateStdLoading = createSelector (
     selectStudentState, (currentState)=>currentState,
 )
@@ -44,7 +43,7 @@ const selectUpdateStdFail = createSelector (
     selectStudentState, (currentState)=>currentState.error,
 )
 
-// ========== delete =========================================
+// ======================= Delete ===========================
 
 const selectDeleteStdLoading = createSelector(
     selectStudentState, (currentState)=>currentState,

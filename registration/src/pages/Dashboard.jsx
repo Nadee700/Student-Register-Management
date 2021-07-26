@@ -7,7 +7,6 @@ import {
   Loader,
   Icon,
   Button,
-  Confirm,
   Modal,
 } from "semantic-ui-react";
 import { deleteStudent, loadStudentData } from "../redux/student/thunks";
@@ -22,17 +21,13 @@ import {
 } from "../redux/student/selectors";
 import { connect } from "react-redux";
 import StdudentForm from "./StudentForm";
-import MaterialTable from "material-table";
-import { student } from "../redux/student/reducers";
+import { StudentDetails } from "./StudentDetails";
 
 const StudentDashboard = ({
   studentData,
   isLoading,
-  studentError,
   initStudents,
   all,
-  deleteStdData,
-  deleteStudent,
   onDeleteStudent,
 }) => {
   const columns = [
@@ -40,10 +35,7 @@ const StudentDashboard = ({
     { title: "Last Name", field: "lastName" },
     { title: "Phone No", field: "phoneNo" },
     { title: "Email", field: "email" },
-    // { title: "NIC", field: "nic" },
-    // { title: "Date of Birth", field: "dateOfBirth" },
-    // { title: "Address", field: "address" },
-    // { title: "Avatar", field: "avatar" },
+    { title: "NIC", field: "nic" },
   ];
   const [studentList, setStudentList] = useState(studentData);
   const [visible, setVisible] = useState(false);
@@ -70,14 +62,13 @@ const StudentDashboard = ({
   };
 
   const handleDelete = (id) => {
-      console.log(id);
-      onDeleteStudent(id)
-      const students = studentList.filter((item) => item.id !== id);
-      console.log(students);
-      setStudentList(students);
-      setVisible(false);
+    console.log(id);
+    onDeleteStudent(id);
+    const students = studentList.filter((item) => item.id !== id);
+    console.log(students);
+    setStudentList(students);
+    setVisible(false);
   };
-
 
   return (
     <div>
@@ -85,8 +76,8 @@ const StudentDashboard = ({
         <Grid>
           <Grid.Row>
             <Grid.Column>
-              <h2>Student Managment</h2>
-              <StdudentForm afterInsertData={afterInsertData}/>
+              <h2><b>Students' Registration Details</b></h2>
+              <StdudentForm afterInsertData={afterInsertData} />
               <Button
                 icon
                 color="teal"
@@ -105,7 +96,7 @@ const StudentDashboard = ({
                 </Dimmer>
               ) : (
                 <MyTable
-                  title=""
+                  title="Active Students"
                   columns={columns}
                   data={studentList}
                   options={{
@@ -113,29 +104,36 @@ const StudentDashboard = ({
                   }}
                   actions={[
                     {
+                      icon: "seeMore",
+                      tooltip: "See More",
+                      onClick: (event, rowData) => {
+                      },
+                    },
+                    {
                       icon: "edit",
                       tooltip: "Edit User",
                       onClick: (event, rowData) => {
-                        console.log(rowData.id, "clicked");
                       },
                     },
                     {
                       icon: "delete",
                       tooltip: "delete User",
                       onClick: (event, rowData) => {
-                        console.log(rowData.id, "clicked");
                       },
                     },
                   ]}
                   options={{ actionsColumnIndex: -1 }}
                   components={{
                     Action: (props) => {
+                      if (props.action.icon === "seeMore") {
+                        return <StudentDetails studentinfo={props.data} />;
+                      }
                       if (props.action.icon === "edit") {
                         return (
                           <StdudentForm
                             formType="update"
                             studentRowData={props.data}
-                            afterUpdateData={afterUpdateData}
+                            afterUpdate={afterUpdateData}
                           />
                         );
                       }
@@ -158,19 +156,18 @@ const StudentDashboard = ({
                               <Modal.Header>Delete Record</Modal.Header>
                               <Modal.Content>
                                 <p>
-                                  Are you sure you want to delete this record
+                                  Are you sure delete this record ?
                                 </p>
                               </Modal.Content>
                               <Modal.Actions>
                                 <Button
-                                  
                                   positive
                                   onClick={() => setVisible(false)}
                                 >
                                   No
                                 </Button>
                                 <Button
-                                 negative 
+                                  negative
                                   onClick={() => handleDelete(props.data.id)}
                                 >
                                   Yes

@@ -20,7 +20,7 @@ export const loadStudentFail = error => ({
 })
 
 
-//=====================Create ============================
+//===================== Create ====================
 export const createStudentStart = () => ({
     type:CREATE_STUDENT_START
 })
@@ -35,7 +35,7 @@ export const createStudentFail = err => ({
     payload:{err}
 })
 
-// ================== update ==============
+// ================== Update ======================
 export const updateStudentStart = () => ({
     type:UPDATE_STUDENT_START
 })
@@ -50,7 +50,7 @@ export const updateStudentFail = err => ({
     payload:{err}
 })
 
-// ================delete =======================
+// ================ Delete =======================
 export const deleteStudentStart = () => ({
     type: DELETE_STUDENT_START
 })

@@ -24,16 +24,6 @@ const MasterLayout = props => {
             >
               Student Management
             </Menu.Item>
-
-            <Menu.Item
-              as="a"
-              onClick={() => {
-                history.push("/");
-              }}
-            >
-              Home
-            </Menu.Item>
-
           </Container>
         </Menu>
 
