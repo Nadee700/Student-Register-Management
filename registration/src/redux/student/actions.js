@@ -2,7 +2,8 @@ import {
     LOAD_STUDENT_START, LOAD_STUDENT_SUCCESS, LOAD_STUDENT_FAIL,
     CREATE_STUDENT_START, CREATE_STUDENT_SUCCESS, CREATE_STUDENT_FAIL,
     UPDATE_STUDENT_START, UPDATE_STUDENT_SUCCESS, UPDATE_STUDENT_FAIL,
-    DELETE_STUDENT_START, DELETE_STUDENT_SUCCESS, DELETE_STUDENT_FAIL
+    DELETE_STUDENT_START, DELETE_STUDENT_SUCCESS, DELETE_STUDENT_FAIL,
+    BULK_DELETE_STUDENT_START, BULK_DELETE_STUDENT_SUCCESS, BULK_DELETE_STUDENT_FAIL
 } from './constants';
 
 export const loadStudentStart = () => ({
@@ -63,4 +64,19 @@ export const deleteStudentSuccess = deleStd => ({
 export const deleteStudentFail = err => ({
     type: DELETE_STUDENT_FAIL,
     payload:{err}
+})
+
+// ================ Bulk delete =======================
+export const bulkDeleteStudentStart= () => ({
+    type:BULK_DELETE_STUDENT_START
+})
+
+export const bulkDeleteStudentSuccess = Ids => ({
+    type:BULK_DELETE_STUDENT_SUCCESS,
+    payload:Ids
+})
+
+export const bulkDeleteStudenetFail = error => ({
+    type:BULK_DELETE_STUDENT_FAIL,
+    payload:error
 })

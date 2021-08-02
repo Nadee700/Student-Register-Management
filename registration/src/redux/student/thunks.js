@@ -10,9 +10,13 @@ import {
     updateStudentFail,
     deleteStudentStart,
     deleteStudentSuccess,
-    deleteStudentFail
+    deleteStudentFail,
+    bulkDeleteStudentStart,
+    bulkDeleteStudentSuccess,
+    bulkDeleteStudenetFail
 } from './actions'
 import axios from 'axios';
+import { Err } from 'joi-browser';
 
 // GET Request
 export const loadStudentData = () => async(dispatch)=> {
@@ -20,7 +24,7 @@ export const loadStudentData = () => async(dispatch)=> {
         dispatch(loadStudentStart());
         const response = await axios ({
             method:'GET',
-            url:'https://localhost:44307/api/Students',
+            url:'https://localhost:44307/api/Students/GetStudent',
         });
         console.log("thunk after", response)
         dispatch(loadStudentSuccess(response));
@@ -37,7 +41,7 @@ export const createStudent = (std) => async(dispatch)=> {
 
         const response = await axios ({
             method:'POST',
-            url:'https://localhost:44307/api/Students',
+            url:'https://localhost:44307/api/Students/PostStudent',
             data:std
         });
 
@@ -50,12 +54,11 @@ export const createStudent = (std) => async(dispatch)=> {
 // Update Request
 export const updateStudent = (std) => async(dispatch)=> {
     try{
-     
         dispatch(updateStudentStart());
 
         const response = await axios({
-            method: 'put',
-            url:`https://localhost:44307/api/Students/${std.id}`,
+            method: 'PUT',
+            url:`https://localhost:44307/api/Students/PutStudent/${std.id}`,
             data: std
           });
       
@@ -72,12 +75,29 @@ export const deleteStudent = (id) => async(dispatch)=> {
         dispatch(deleteStudentStart());
 
         const response = await axios({
-            method: 'delete',
-            url:`https://localhost:44307/api/Students/${id}`,
+            method: 'DELETE',
+            url:`https://localhost:44307/api/Students/DeleteStudent/${id}`,
         });
       console.log(response)
         dispatch(deleteStudentSuccess(response));
     }catch(err){
         dispatch(deleteStudentFail(err));
+    }
+}
+
+//Bulk Delete Request
+export const bulkDeleteStudent = (ids) => async(dispatch)=> {
+    try{
+        dispatch(bulkDeleteStudentStart());
+
+        const response = await axios({
+            method: 'POST',
+            url:`https://localhost:44307/api/Students/BulkDelete`,
+            data: ids
+        });
+
+        dispatch(bulkDeleteStudentSuccess(response))
+    }catch(err){
+        dispatch(bulkDeleteStudenetFail(Err))
     }
 }

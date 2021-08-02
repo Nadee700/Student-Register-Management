@@ -1,27 +1,39 @@
-import React, { useState } from "react";
-import { Button, Form, Modal, Icon, Image } from "semantic-ui-react";
+import React, { useState, useEffect } from "react";
+import { Button, Form, Card, Icon, Image } from "semantic-ui-react";
 import { connect } from "react-redux";
-import { createStudent, updateStudent } from "../redux/student/thunks";
+import {
+  createStudent,
+  updateStudent,
+  loadStudentData,
+} from "../redux/student/thunks";
 import {
   selectAddStdFail,
   selectAddStdLoading,
   selectAddStdSuccessData,
   selectUpdateStdFail,
   selectUpdateStdLoading,
-  selectUpdateStdSuccess, 
+  selectUpdateStdSuccess,
 } from "../redux/student/selectors";
 import FileBase64 from "react-file-base64";
 import { validateForm, validateProperty } from "../helpers/validation";
 import { StudentSchema } from "../schema/student";
+import { useToasts } from "react-toast-notifications";
+import { DeleteStudent } from '../components/DeleteModal';
+import {
+  DateInput,
+} from 'semantic-ui-calendar-react';
 
 const StudentForm = ({
   onPostStudent,
   formType = "new",
   studentRowData,
   onUpdateStudent,
-  afterInsertData,
-  afterUpdate,
+  toggleIndex,
+  initStudents,
+  handleDelete,
+  checkEmailExists,
 }) => {
+  const { addToast } = useToasts();
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastName] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
@@ -30,8 +42,14 @@ const StudentForm = ({
   const [bday, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState([]);
+  const [buttonState, setButtonState] = useState(false);
+
+  useEffect(() => {
+    if (formType === "update") {
+      setFormData();
+    }
+  }, [studentRowData.id]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -51,9 +69,6 @@ const StudentForm = ({
       case "phoneNo":
         setPhoneNo(value);
         break;
-      case "email":
-        setEmail(value);
-        break;
       case "nic":
         setNic(value);
         break;
@@ -67,6 +82,28 @@ const StudentForm = ({
         break;
     }
   };
+
+  const handleEmail = (event) => {
+    const { name, value } = event.target;
+    
+    const alreadyexists = checkEmailExists(value);
+    const errorMessage = validateProperty(name, value, StudentSchema);
+    console.log(alreadyexists);
+    if (errorMessage) {
+      errors["email"] = errorMessage;
+    } else if (alreadyexists) {
+      errors["email"] = "email already exists";
+      setButtonState(true)
+    } else {
+      delete errors["email"];
+      setButtonState(false);
+    }
+    setEmail(value);
+  }
+
+ const handleDateOfBirth = (event, {name, value}) => {
+    setDateOfBirth(value);
+  }
 
   const setFormData = () => {
     setFirstname(studentRowData.firstName);
@@ -89,9 +126,8 @@ const StudentForm = ({
     setDateOfBirth("");
     setAvatar("");
     setErrors([]);
-    setOpen(false);
   };
-  const doSubmit = () => {
+  const doSubmit = async () => {
     const studentFormData = {
       firstName: firstname,
       lastName: lastname,
@@ -102,7 +138,7 @@ const StudentForm = ({
       address: address,
       avatar: avatar,
     };
- 
+
     const validateResponse = validateForm(studentFormData, StudentSchema);
 
     if (!validateResponse) {
@@ -119,17 +155,17 @@ const StudentForm = ({
           avatar: avatar,
         };
 
-        onUpdateStudent(editData);
-        afterUpdate(editData);
+        await onUpdateStudent(editData);
+        addToast("Updated Successfully", { appearance: "success" });
       } else {
-        onPostStudent(studentFormData);
-        afterInsertData(studentFormData);
+        await onPostStudent(studentFormData);
+        addToast("Saved Successfully", { appearance: "success" });
       }
-      setOpen(false);
-      resetForm()
+      await initStudents();
+      toggleIndex();
+      resetForm();
     } else {
       setErrors(validateResponse);
-      setOpen(true);
     }
   };
 
@@ -138,67 +174,47 @@ const StudentForm = ({
   };
 
   return (
-    <div>
-      <Modal
-        closeIcon
-        open={open}
-        onClose={resetForm}
-        onOpen={() => setOpen(true)}
-        trigger={
-          formType === "new" ? (
-            <Button primary floated="right">
-              <Icon name="add" />
-              Add new student
-            </Button>
-          ) : (
-            <Button
-              icon
-              color="orange"
-              size="small"
-              onClick={() => setFormData()}
-            >
-              <Icon name="edit" />
-            </Button>
-          )
-        }
-      >
-        <Modal.Header>
-          {formType === "new" ? "Add New" : "Update"} Student Data
-        </Modal.Header>
-        <Modal.Content>
+    <Card fluid>
+      <Card.Content>
+        <Image floated="left" size="small" src={avatar} />
+        <Card.Header>Student Info Card</Card.Header>
+        <br></br>
+        <Card.Meta>
+          <Form.Group widths="equal">
+            <Form.Field>
+              <label><b>First Name</b></label>
+              <Form.Input
+                fluid
+                placeholder="First Name"
+                value={firstname}
+                onChange={handleChange}
+                name="firstName"
+                error={
+                  errors["firstName"]
+                    ? { content: errors["firstName"], pointing: "below" }
+                    : null
+                }
+              />
+            </Form.Field>
+            <Form.Field>
+              <label><b>Last Name</b></label>
+              <Form.Input
+                fluid
+                placeholder="Last Name"
+                value={lastname}
+                onChange={handleChange}
+                name="lastName"
+                error={
+                  errors["lastName"]
+                    ? { content: errors["lastName"], pointing: "below" }
+                    : null
+                }
+              />
+            </Form.Field>
+          </Form.Group>
+        </Card.Meta>
+        <Card.Description>
           <Form>
-            <Image src={avatar} size="small" />
-            <br />
-            <Form.Group widths="equal">
-              <Form.Field>
-                <label>First Name</label>
-                <Form.Input
-                  placeholder="First Name"
-                  value={firstname}
-                  onChange={handleChange}
-                  name="firstName"
-                  error={
-                    errors["firstName"]
-                      ? { content: errors["firstName"], pointing: "below" }
-                      : null
-                  }
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Last Name</label>
-                <Form.Input
-                  placeholder="Last Name"
-                  value={lastname}
-                  onChange={handleChange}
-                  name="lastName"
-                  error={
-                    errors["lastName"]
-                      ? { content: errors["lastName"], pointing: "below" }
-                      : null
-                  }
-                />
-              </Form.Field>
-            </Form.Group>
             <Form.Group widths="equal">
               <Form.Field>
                 <label>Phone No</label>
@@ -219,7 +235,7 @@ const StudentForm = ({
                 <Form.Input
                   placeholder="Email"
                   value={email}
-                  onChange={handleChange}
+                  onChange={handleEmail}
                   name="email"
                   error={
                     errors["email"]
@@ -246,17 +262,31 @@ const StudentForm = ({
               </Form.Field>
               <Form.Field>
                 <label>Date of Birth</label>
-                <input
-                  type="date"
+                {/* <Form.Input
+                  
                   placeholder="Date of birth"
                   value={bday}
                   onChange={handleChange}
                   name="dateOfBirth"
+                  min="1997-01-01" max="2020-12-31"
+                  error={
+                    errors["dateOfBirth"]
+                      ? { content: errors["dateOfBirth"], pointing: "below" }
+                      : null
+                  }
+                /> */}
+                <DateInput
+                  name="date"
+                  placeholder="Date"
+                  value={bday}
+                  iconPosition="left"
+                  onChange={handleDateOfBirth}
+                  dateFormat="YYYY-MM-DD"
                 />
               </Form.Field>
             </Form.Group>
-            <Form.Group widths="equal">
-              <Form.Field>
+            <Form.Group>
+              <Form.Field width={16}>
                 <label>Address</label>
                 <Form.Input
                   placeholder="Address"
@@ -270,17 +300,25 @@ const StudentForm = ({
                   }
                 />
               </Form.Field>
-              <FileBase64 multiple={true} onDone={getFiles} />
+              <Form.Field>
+                <label>Image</label>
+                <FileBase64 multiple={true} onDone={getFiles} />
+              </Form.Field>
             </Form.Group>
           </Form>
-        </Modal.Content>
-        <Modal.Actions>
-          <Button onClick={() => doSubmit()} primary>
-            <Icon name="save" /> Save
+        </Card.Description>
+      </Card.Content>
+      <Card.Content extra>
+        <div className="ui two buttons">
+          {formType === "update" && (
+            <DeleteStudent handleDelete={handleDelete} data={studentRowData} />
+          )}
+          <Button disabled={buttonState} onClick={() => doSubmit()} primary>
+            <Icon name="save" /> {formType === "update" ? "Update" : "Save"}
           </Button>
-        </Modal.Actions>
-      </Modal>
-    </div>
+        </div>
+      </Card.Content>
+    </Card>
   );
 };
 
@@ -296,6 +334,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   onPostStudent: (std) => dispatch(createStudent(std)),
   onUpdateStudent: (std) => dispatch(updateStudent(std)),
+  initStudents: () => dispatch(loadStudentData()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(StudentForm);

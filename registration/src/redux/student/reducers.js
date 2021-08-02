@@ -2,7 +2,8 @@ import {
     LOAD_STUDENT_START, LOAD_STUDENT_SUCCESS, LOAD_STUDENT_FAIL,
     CREATE_STUDENT_START, CREATE_STUDENT_SUCCESS, CREATE_STUDENT_FAIL,
     UPDATE_STUDENT_START, UPDATE_STUDENT_SUCCESS, UPDATE_STUDENT_FAIL, 
-    DELETE_STUDENT_START, DELETE_STUDENT_SUCCESS, DELETE_STUDENT_FAIL
+    DELETE_STUDENT_START, DELETE_STUDENT_SUCCESS, DELETE_STUDENT_FAIL,
+    BULK_DELETE_STUDENT_START, BULK_DELETE_STUDENT_SUCCESS, BULK_DELETE_STUDENT_FAIL
 } from './constants';
 
 const INITIAL_STATE = {
@@ -12,6 +13,7 @@ const INITIAL_STATE = {
     addSucess: null,
     upSuccess:null,
     deleSuccess:null,
+    getByIdSuccess:null,
 }
 
 export const student = (state = INITIAL_STATE, {type, payload}) => {
@@ -52,6 +54,15 @@ export const student = (state = INITIAL_STATE, {type, payload}) => {
         case DELETE_STUDENT_FAIL:{
             return deleteStudentFail(state, payload)
         }
+        case BULK_DELETE_STUDENT_START:{
+            return bulkDeleteStudentStart(state)
+        }
+        case BULK_DELETE_STUDENT_SUCCESS:{
+            return bulkDeleteStudentSuccess(state,payload)
+        }
+        case BULK_DELETE_STUDENT_FAIL:{
+            return bulkDeleteStudenetFail(state, payload)
+        }
         default:
             return state;
     }
@@ -81,7 +92,6 @@ function loadStudentFail(state, { error }){
 }
 
 // ==================== Create student ============================
-
 function createStudentStart(state){
     return {
         ...state,
@@ -106,7 +116,6 @@ function createStudentFail(state,{err}){
 }
 
 // ============= Update student =================
-
 function updateStudentStart(state){
     return{
         ...state,
@@ -131,14 +140,12 @@ function updateStudentFail(state, {err}){
 }
 
 // ============= Delete student =================
-
 function deleteStudentStart(state){
     return{
         ...state,
         isLoading:true
     }
 }
-
 function deleteStudentSuccess(state, {data}){
     return{
         ...state,
@@ -146,11 +153,32 @@ function deleteStudentSuccess(state, {data}){
         deleSuccess:data
     }
 }
-
 function deleteStudentFail(state, {err}){
     return{
         ...state,
         isLoading:false,
         errors:err
+    }
+}
+
+// =========== bulk delete by Ids =======================
+function bulkDeleteStudentStart(state){
+    return {
+        ...state,
+        isLoading:true
+    }
+}
+function bulkDeleteStudentSuccess(state, {Ids}){
+    return{
+        ...state,
+        isLoading:false,
+        getByIdSuccess:Ids
+    }
+}
+function bulkDeleteStudenetFail(state, {error}){
+    return{
+        ...state,
+        isLoading:false,
+        error:error
     }
 }

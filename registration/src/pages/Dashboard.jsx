@@ -1,35 +1,32 @@
 import React, { useState, useEffect } from "react";
-import MyTable from "../components/MyTable";
 import {
   Segment,
   Grid,
-  Dimmer,
-  Loader,
   Icon,
-  Button,
-  Modal,
+  Button
 } from "semantic-ui-react";
-import { deleteStudent, loadStudentData } from "../redux/student/thunks";
+import { deleteStudent, loadStudentData, bulkDeleteStudent } from "../redux/student/thunks";
+import { useToasts } from "react-toast-notifications";
 import {
   selectStdIsLoading,
   selectStdSuccessData,
   selectStdFail,
-  selectStudentState,
   selectDeleteStdLoading,
   selectDeleteStdFail,
   selectDeleteStdSuccsee,
 } from "../redux/student/selectors";
 import { connect } from "react-redux";
 import StdudentForm from "./StudentForm";
-import { StudentDetails } from "./StudentDetails";
+import MaterialTable from "material-table";
 
 const StudentDashboard = ({
   studentData,
   isLoading,
   initStudents,
-  all,
   onDeleteStudent,
+  onBulkDeleteStudent
 }) => {
+
   const columns = [
     { title: "First Name", field: "firstName" },
     { title: "Last Name", field: "lastName" },
@@ -37,37 +34,111 @@ const StudentDashboard = ({
     { title: "Email", field: "email" },
     { title: "NIC", field: "nic" },
   ];
-  const [studentList, setStudentList] = useState([]);
-  const [visible, setVisible] = useState(false);
 
+  const { addToast } = useToasts();
+  const [visible, setVisible] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [studentInfo, setStudentInfo] = useState({});
+  const [tableWidth, setTableWidth] = useState(16);
+  const [formType, setFormType] = useState('new');
+  
   useEffect(() => {
     loadStudents();
   },[]);
 
   const loadStudents = async () => {
-    await initStudents();
-    setStudentList(studentData);
-    console.log(all, isLoading, studentData);
+     await initStudents();
+     setVisible(false);
+     setTableWidth(16);
   };
 
-  const afterUpdateData = (data) => {
-    const students = studentList.filter((item) => item.id !== data.id);
-    const updatedStudentsList = [data, ...students];
-    setStudentList(updatedStudentsList);
+  const addNewData = () => {
+    toggleIndex();
+    setStudentInfo({});
+    setFormType("new");
   };
 
-  const afterInsertData = (data) => {
-    const updatedStudentsList = [...studentList, data];
-    setStudentList(updatedStudentsList);
-  };
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     console.log(id);
-    onDeleteStudent(id);
-    const students = studentList.filter((item) => item.id !== id);
-    console.log(students);
-    setStudentList(students);
-    setVisible(false);
+    await onDeleteStudent(id);
+    loadStudents();
+    toggleIndex();
+    setStudentInfo({});
+    setFormType("new");
+    addToast("Deleted Successfully", { appearance: "success" });
+  };
+
+  const handleBulkDelete = async () => {
+    let rowIds = []
+    selectedRows.forEach((row, i) => rowIds.push(row.id));
+    console.log(rowIds);
+    await onBulkDeleteStudent(rowIds)
+    addToast("Deleted Successfully", { appearance: "success" });
+    await initStudents();
+      // const updatedData = tableData.filter(
+      //   (row) => !selectedRows.includes(row)
+      // );
+      // setTableData(updatedData);
+  };
+
+  const checkEmailExists = (email) => {
+    const emailCheck = studentData.filter(
+      (row) => {
+        if (row.email === email) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    );
+
+    if ((emailCheck.length === 0)) {
+      return false
+    } else {
+      return true;
+    };
+  }
+
+  const toggleIndex = () => {
+    setVisible((prevState) => {
+      if (prevState) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+    setTableWidth((prevState) => {
+      if (prevState === 10) {
+        return 16;
+      } else {
+        return 10;
+      }
+    });
+  }
+
+  const displayCardData = (data) => {
+    if (studentInfo.id === data.id) {
+      setVisible((prevState) => {
+        if (prevState) {
+          return false
+        } else {
+          return true
+        }
+      })
+      setTableWidth((prevState) => {
+        if (prevState === 10) {
+          return 16
+        } else {
+          return 10
+        }
+      })
+    } else {
+      setVisible(true);
+      setTableWidth(10);
+    }
+
+    setFormType('update');
+    setStudentInfo(data)
   };
 
   return (
@@ -76,8 +147,13 @@ const StudentDashboard = ({
         <Grid>
           <Grid.Row>
             <Grid.Column>
-              <h2><b>Students' Registration Details</b></h2>
-              <StdudentForm afterInsertData={afterInsertData} />
+              <h2>
+                <b>Students' Registration Details</b>
+              </h2>
+              <Button primary floated="right" onClick={() => addNewData()}>
+                <Icon name="add" />
+                Add new student
+              </Button>
               <Button
                 icon
                 color="teal"
@@ -88,101 +164,44 @@ const StudentDashboard = ({
               </Button>
             </Grid.Column>
           </Grid.Row>
-          <Grid.Row>
-            <Grid.Column>
-              {isLoading === true ? (
-                <Dimmer active>
-                  <Loader size="big">Loading</Loader>
-                </Dimmer>
-              ) : (
-                <MyTable
-                  title="Active Students"
-                  columns={columns}
-                  data={studentList}
-                  options={{
-                    filtering: true,
-                  }}
-                  actions={[
-                    {
-                      icon: "seeMore",
-                      tooltip: "See More",
-                      onClick: (event, rowData) => {
-                      },
-                    },
-                    {
-                      icon: "edit",
-                      tooltip: "Edit User",
-                      onClick: (event, rowData) => {
-                      },
-                    },
-                    {
-                      icon: "delete",
-                      tooltip: "delete User",
-                      onClick: (event, rowData) => {
-                      },
-                    },
-                  ]}
-                  options={{ actionsColumnIndex: -1 }}
-                  components={{
-                    Action: (props) => {
-                      if (props.action.icon === "seeMore") {
-                        return <StudentDetails studentinfo={props.data} />;
-                      }
-                      if (props.action.icon === "edit") {
-                        return (
-                          <StdudentForm
-                            formType="update"
-                            studentRowData={props.data}
-                            afterUpdate={afterUpdateData}
-                          />
-                        );
-                      }
-                      if (props.action.icon === "delete") {
-                        return (
-                          <>
-                            <Button
-                              icon
-                              color="red"
-                              onClick={() => setVisible(true)}
-                            >
-                              <Icon name="trash" />
-                            </Button>
+        </Grid>
+        <Grid columns="equal">
+          <Grid.Column width={tableWidth}>
+            <Segment basic>
+              <MaterialTable
+                isLoading={isLoading}
+                title="Active Students"
+                data={studentData}
+                onSelectionChange={(rows) => setSelectedRows(rows)}
+                onRowClick={(event, rowData) => displayCardData(rowData)}
+                columns={columns}
+                options={{
+                  selection: true,
+                }}
+                actions={[
+                  {
+                    icon: "delete",
+                    tooltip: "Delete all selected rows",
+                    onClick: () => handleBulkDelete(),
+                  },
+                ]}
+              />
+            </Segment>
+          </Grid.Column>
 
-                            <Modal
-                              size="mini"
-                              open={visible}
-                              onClose={() => setVisible(false)}
-                            >
-                              <Modal.Header>Delete Record</Modal.Header>
-                              <Modal.Content>
-                                <p>
-                                  Are you sure delete this record ?
-                                </p>
-                              </Modal.Content>
-                              <Modal.Actions>
-                                <Button
-                                  positive
-                                  onClick={() => setVisible(false)}
-                                >
-                                  No
-                                </Button>
-                                <Button
-                                  negative
-                                  onClick={() => handleDelete(props.data.id)}
-                                >
-                                  Yes
-                                </Button>
-                              </Modal.Actions>
-                            </Modal>
-                          </>
-                        );
-                      }
-                    },
-                  }}
+          {visible && (
+            <Grid.Column>
+              <Segment basic>
+                <StdudentForm
+                  studentRowData={studentInfo}
+                  formType={formType}
+                  toggleIndex={toggleIndex}
+                  handleDelete={handleDelete}
+                  checkEmailExists={checkEmailExists}
                 />
-              )}
+              </Segment>
             </Grid.Column>
-          </Grid.Row>
+          )}
         </Grid>
       </Segment>
     </div>
@@ -193,16 +212,18 @@ const mapStateToProps = (state) => ({
   studentData: selectStdSuccessData(state),
   studentError: selectStdFail(state),
   isLoading: selectStdIsLoading(state),
-  all: selectStudentState(state),
 
   deleteStdLoading: selectDeleteStdLoading(state),
   deleteStdData: selectDeleteStdSuccsee(state),
   deleteStdError: selectDeleteStdFail(state),
+
+
 });
 
 const mapDispatchToProps = (dispatch) => ({
   initStudents: () => dispatch(loadStudentData()),
   onDeleteStudent: (id) => dispatch(deleteStudent(id)),
+  onBulkDeleteStudent: (ids) => dispatch(bulkDeleteStudent(ids)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(StudentDashboard);
