@@ -75,10 +75,6 @@ const StudentDashboard = ({
     await onBulkDeleteStudent(rowIds)
     addToast("Deleted Successfully", { appearance: "success" });
     await initStudents();
-      // const updatedData = tableData.filter(
-      //   (row) => !selectedRows.includes(row)
-      // );
-      // setTableData(updatedData);
   };
 
   const checkEmailExists = (email) => {
@@ -216,7 +212,6 @@ const mapStateToProps = (state) => ({
   deleteStdLoading: selectDeleteStdLoading(state),
   deleteStdData: selectDeleteStdSuccsee(state),
   deleteStdError: selectDeleteStdFail(state),
-
 
 });
 

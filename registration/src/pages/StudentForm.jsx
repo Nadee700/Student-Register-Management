@@ -262,19 +262,6 @@ const StudentForm = ({
               </Form.Field>
               <Form.Field>
                 <label>Date of Birth</label>
-                {/* <Form.Input
-                  
-                  placeholder="Date of birth"
-                  value={bday}
-                  onChange={handleChange}
-                  name="dateOfBirth"
-                  min="1997-01-01" max="2020-12-31"
-                  error={
-                    errors["dateOfBirth"]
-                      ? { content: errors["dateOfBirth"], pointing: "below" }
-                      : null
-                  }
-                /> */}
                 <DateInput
                   name="date"
                   placeholder="Date"

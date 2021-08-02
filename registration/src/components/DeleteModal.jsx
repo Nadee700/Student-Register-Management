@@ -8,6 +8,7 @@ export const DeleteStudent = ({ data, handleDelete }) => {
     <>
       <Button icon color="red" onClick={() => setVisible(true)}>
         <Icon name="trash" />
+         &nbsp;&nbsp;Delete
       </Button>
 
       <Modal size="mini" open={visible} onClose={() => setVisible(false)}>
