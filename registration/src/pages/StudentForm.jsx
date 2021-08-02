@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, Card, Icon, Image } from "semantic-ui-react";
+import { Button, Form, Card, Icon, Image, Header } from "semantic-ui-react";
 import { connect } from "react-redux";
 import {
   createStudent,
@@ -22,6 +22,7 @@ import { DeleteStudent } from '../components/DeleteModal';
 import {
   DateInput,
 } from 'semantic-ui-calendar-react';
+import dummyavatar from '../assests/dummyAvatar.png'
 
 const StudentForm = ({
   onPostStudent,
@@ -41,7 +42,7 @@ const StudentForm = ({
   const [nic, setNic] = useState("");
   const [bday, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState(dummyavatar);
   const [errors, setErrors] = useState([]);
   const [buttonState, setButtonState] = useState(false);
 
@@ -124,7 +125,7 @@ const StudentForm = ({
     setNic("");
     setAddress("");
     setDateOfBirth("");
-    setAvatar("");
+    setAvatar(dummyavatar);
     setErrors([]);
   };
   const doSubmit = async () => {
@@ -176,11 +177,16 @@ const StudentForm = ({
   return (
     <Card fluid>
       <Card.Content>
-        <Image floated="left" size="small" src={avatar} />
-        <Card.Header>Student Info Card</Card.Header>
-        <br></br>
-        <Card.Meta>
-          <Form.Group widths="equal">
+        <Image  floated="left" size="small" Avatar src={avatar}/>
+        <Header as='h2' icon='student' textAlign='center' content='Student Info Card' /><br/>
+     <Card.Meta>
+        <Form.Field>
+        <Form.Group>
+            <label>Image</label>
+                <FileBase64 multiple={true} onDone={getFiles} />             
+          </Form.Group>
+          </Form.Field><br/><br/>
+          {/* <Form.Group widths="equal">
             <Form.Field>
               <label><b>First Name</b></label>
               <Form.Input
@@ -211,14 +217,49 @@ const StudentForm = ({
                 }
               />
             </Form.Field>
-          </Form.Group>
+          </Form.Group> */}
         </Card.Meta>
         <Card.Description>
           <Form>
+          <Form.Group widths="equal">
+            <Form.Field>
+              <label><b>First Name</b></label>
+              <Form.Input
+                size='small'
+                fluid
+                placeholder="First Name"
+                value={firstname}
+                onChange={handleChange}
+                name="firstName"
+                error={
+                  errors["firstName"]
+                    ? { content: errors["firstName"], pointing: "below" }
+                    : null
+                }
+              />
+            </Form.Field>
+            <Form.Field>
+              <label><b>Last Name</b></label>
+              <Form.Input
+                size='small'
+                fluid
+                placeholder="Last Name"
+                value={lastname}
+                onChange={handleChange}
+                name="lastName"
+                error={
+                  errors["lastName"]
+                    ? { content: errors["lastName"], pointing: "below" }
+                    : null
+                }
+              />
+            </Form.Field>
+          </Form.Group>
             <Form.Group widths="equal">
               <Form.Field>
                 <label>Phone No</label>
                 <Form.Input
+                  size='small'
                   placeholder="Phone no"
                   value={phoneNo}
                   onChange={handleChange}
@@ -233,6 +274,7 @@ const StudentForm = ({
               <Form.Field>
                 <label>Email</label>
                 <Form.Input
+                  size='small'
                   placeholder="Email"
                   value={email}
                   onChange={handleEmail}
@@ -249,6 +291,7 @@ const StudentForm = ({
               <Form.Field>
                 <label>NIC</label>
                 <Form.Input
+                  size='small'
                   placeholder="NIC"
                   value={nic}
                   onChange={handleChange}
@@ -263,6 +306,7 @@ const StudentForm = ({
               <Form.Field>
                 <label>Date of Birth</label>
                 <DateInput
+                  size='small'
                   name="date"
                   placeholder="Date"
                   value={bday}
@@ -275,7 +319,8 @@ const StudentForm = ({
             <Form.Group>
               <Form.Field width={16}>
                 <label>Address</label>
-                <Form.Input
+                <Form.TextArea
+                  size='small'
                   placeholder="Address"
                   value={address}
                   onChange={handleChange}
@@ -285,12 +330,12 @@ const StudentForm = ({
                       ? { content: errors["address"], pointing: "below" }
                       : null
                   }
-                />
+                  />
               </Form.Field>
-              <Form.Field>
+              {/* <Form.Field>
                 <label>Image</label>
                 <FileBase64 multiple={true} onDone={getFiles} />
-              </Form.Field>
+              </Form.Field> */}
             </Form.Group>
           </Form>
         </Card.Description>
@@ -300,7 +345,7 @@ const StudentForm = ({
           {formType === "update" && (
             <DeleteStudent handleDelete={handleDelete} data={studentRowData} />
           )}
-          <Button disabled={buttonState} onClick={() => doSubmit()} primary>
+          <Button disabled={buttonState} onClick={() => doSubmit()} secondary>
             <Icon name="save" /> {formType === "update" ? "Update" : "Save"}
           </Button>
         </div>

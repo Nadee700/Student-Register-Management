@@ -78,21 +78,25 @@ const StudentDashboard = ({
   };
 
   const checkEmailExists = (email) => {
-    const emailCheck = studentData.filter(
-      (row) => {
-        if (row.email === email) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    );
-
-    if ((emailCheck.length === 0)) {
-      return false
+    if(studentData.length === 0) {
+      return false;
     } else {
-      return true;
-    };
+      const emailCheck = studentData.filter(
+        (row) => {
+          if (row.email === email) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      );
+  
+      if ((emailCheck.length === 0)) {
+        return false
+      } else {
+        return true;
+      };
+    }
   }
 
   const toggleIndex = () => {
