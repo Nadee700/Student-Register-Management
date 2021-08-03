@@ -9,7 +9,7 @@ using StudentManagementAPI.Models;
 
 namespace StudentManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class StudentsController : ControllerBase
     {
@@ -83,6 +83,27 @@ namespace StudentManagementAPI.Controllers
             return CreatedAtAction("GetStudent", new { id = student.Id }, student);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<Student>> BulkDelete(int[] ids)
+        {
+           
+            foreach (int id in ids)
+            {
+                var student = await _context.Student.FindAsync(id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Student.Remove(student);
+                await _context.SaveChangesAsync();
+               
+            }
+
+            return NoContent();
+
+        }
+
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
@@ -98,6 +119,7 @@ namespace StudentManagementAPI.Controllers
 
             return NoContent();
         }
+
 
         private bool StudentExists(int id)
         {
